@@ -1,4 +1,5 @@
-import type { PipelineStage } from './pipeline-stage'
+import type { PipelineStageSummary } from './pipeline-stage'
+import type { CompanySummary } from './company'
 
 export type DealStatus = 'OPEN' | 'WON' | 'LOST'
 
@@ -11,11 +12,11 @@ export interface Deal {
   notes: string | null
   status: DealStatus
   stageId: string
-  stage: { id: string; name: string; color: string; order: number }
+  stage: PipelineStageSummary
   contactId: string | null
   contact: { id: string; name: string } | null
   companyId: string | null
-  company: { id: string; name: string } | null
+  company: CompanySummary | null
   createdAt: string
   updatedAt: string
 }
@@ -34,6 +35,6 @@ export interface CreateDealDto {
 export type UpdateDealDto = Partial<CreateDealDto> & { status?: DealStatus }
 
 export interface DealsGroupedByStage {
-  stage: PipelineStage
+  stage: PipelineStageSummary
   deals: Deal[]
 }

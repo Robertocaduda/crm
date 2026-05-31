@@ -7,6 +7,13 @@ export interface PipelineStage {
   updatedAt: string
 }
 
+export interface PipelineStageSummary {
+  id: string
+  name: string
+  color: string
+  order: number
+}
+
 export interface CreatePipelineStageDto {
   name: string
   color: string
