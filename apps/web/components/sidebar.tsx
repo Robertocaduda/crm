@@ -16,6 +16,9 @@ export default function Sidebar({ user }: SidebarProps) {
   const [contactsOpen, setContactsOpen] = useState(
     pathname.startsWith('/contatos') || pathname.startsWith('/empresas') || pathname.startsWith('/tags')
   )
+  const [pipelineOpen, setPipelineOpen] = useState(
+    pathname.startsWith('/pipeline') || pathname.startsWith('/configuracoes/pipeline')
+  )
 
   const initials = user.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
 
@@ -42,6 +45,7 @@ export default function Sidebar({ user }: SidebarProps) {
           <span className="text-sm w-4 text-center">📊</span> Dashboard
         </Link>
 
+        {/* Contatos group */}
         <button
           onClick={() => setContactsOpen((o) => !o)}
           className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
@@ -70,9 +74,41 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
         )}
 
+        {/* Pipeline group */}
+        <button
+          onClick={() => setPipelineOpen((o) => !o)}
+          className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
+        >
+          <span className="text-sm w-4 text-center">💼</span>
+          <span>Pipeline</span>
+          <span className="ml-auto text-slate-600 text-[10px]">{pipelineOpen ? '▾' : '▸'}</span>
+        </button>
+
+        {pipelineOpen && (
+          <div className="ml-4 border-l border-slate-800">
+            {[
+              { label: 'Negociações', href: '/pipeline', icon: '💼' },
+              { label: 'Histórico', href: '/pipeline/historico', icon: '📋' },
+              { label: 'Configurações', href: '/configuracoes/pipeline', icon: '⚙️' },
+            ].map((item) => {
+              const active = pathname.startsWith(item.href) &&
+                !(item.href === '/pipeline' && pathname.startsWith('/pipeline/historico'))
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2 pl-4 pr-4 py-2 text-[12px] transition-colors relative ${active ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-white hover:bg-slate-800/50'}`}
+                >
+                  {active && <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-500 rounded-r" />}
+                  <span>{item.icon}</span> {item.label}
+                </Link>
+              )
+            })}
+          </div>
+        )}
+
         <p className="px-4 py-2 mt-2 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Outros</p>
         {[
-          { label: 'Pipeline', icon: '💼', phase: 3 },
           { label: 'Tarefas', icon: '✅', phase: 4 },
           { label: 'Suporte', icon: '🎧', phase: 5 },
           { label: 'Marketing', icon: '📣', phase: 6 },
