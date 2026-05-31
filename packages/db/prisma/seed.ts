@@ -128,7 +128,76 @@ async function main() {
     })
   }
 
-  console.log('Seed Fase 3 completo: 3 estágios + 5 deals criados.')
+  // Tasks
+  const adminUser = await prisma.user.findUnique({ where: { email: 'admin@crm.dev' } })
+  if (adminUser) {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const lastWeek = new Date()
+    lastWeek.setDate(lastWeek.getDate() - 3)
+
+    const tasksData = [
+      {
+        id: 'task-1',
+        title: 'Ligar para Maria Silva',
+        priority: 'HIGH' as const,
+        status: 'PENDING' as const,
+        recurrence: 'NONE' as const,
+        dueAt: tomorrow,
+        assigneeId: adminUser.id,
+        contactId: (await prisma.contact.findFirst({ where: { email: 'maria@techsolutions.com' } }))?.id ?? null,
+      },
+      {
+        id: 'task-2',
+        title: 'Enviar proposta GlobalCorp',
+        priority: 'HIGH' as const,
+        status: 'PENDING' as const,
+        recurrence: 'NONE' as const,
+        dueAt: tomorrow,
+        assigneeId: adminUser.id,
+        dealId: 'deal-2',
+      },
+      {
+        id: 'task-3',
+        title: 'Follow-up semanal Tech Solutions',
+        priority: 'MEDIUM' as const,
+        status: 'PENDING' as const,
+        recurrence: 'WEEKLY' as const,
+        dueAt: tomorrow,
+        assigneeId: adminUser.id,
+        companyId: techSolutions.id,
+      },
+      {
+        id: 'task-4',
+        title: 'Atualizar dados StartupXYZ',
+        priority: 'LOW' as const,
+        status: 'DONE' as const,
+        recurrence: 'NONE' as const,
+        dueAt: lastWeek,
+        assigneeId: adminUser.id,
+        companyId: startupXYZ.id,
+      },
+      {
+        id: 'task-5',
+        title: 'Reunião mensal de pipeline',
+        priority: 'MEDIUM' as const,
+        status: 'PENDING' as const,
+        recurrence: 'MONTHLY' as const,
+        dueAt: tomorrow,
+        assigneeId: adminUser.id,
+      },
+    ]
+
+    for (const t of tasksData) {
+      await prisma.task.upsert({
+        where: { id: t.id },
+        update: {},
+        create: t,
+      })
+    }
+  }
+
+  console.log('Seed Fase 4 completo: 5 tarefas criadas.')
 }
 
 main()

@@ -14,6 +14,7 @@ model User {
   passwordHash String
   role         Role     @default(USER)
   refreshToken String?
+  tasks        Task[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -32,6 +33,7 @@ model Company {
   notes     String?
   contacts  Contact[]
   deals     Deal[]
+  tasks     Task[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -54,6 +56,7 @@ model Contact {
   companyId String?
   tags      Tag[]
   deals     Deal[]
+  tasks     Task[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -82,6 +85,7 @@ model Deal {
   contactId       String?
   company         Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
   companyId       String?
+  tasks           Task[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 }
@@ -90,4 +94,47 @@ enum DealStatus {
   OPEN
   WON
   LOST
+}
+
+model Task {
+  id              String       @id @default(cuid())
+  title           String
+  notes           String?
+  dueAt           DateTime?
+  priority        TaskPriority @default(MEDIUM)
+  status          TaskStatus   @default(PENDING)
+  recurrence      Recurrence   @default(NONE)
+  recurrenceEndAt DateTime?
+
+  assignee        User         @relation(fields: [assigneeId], references: [id])
+  assigneeId      String
+
+  contact         Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId       String?
+  company         Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId       String?
+  deal            Deal?        @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  dealId          String?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
+
+enum Recurrence {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
 }
