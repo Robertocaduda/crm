@@ -2,7 +2,10 @@
   "name": "crm",
   "private": true,
   "packageManager": "npm@11.12.1",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
