@@ -5,15 +5,10 @@ import Link from 'next/link'
 import { pipelineDealsApi } from '@/lib/api/pipeline-deals'
 import DealCard from './deal-card'
 import DealTable from './deal-table'
-import type { PipelineStageSummary, Deal, DealsGroupedByStage } from '@crm/shared'
-
-interface DealGroup {
-  stage: PipelineStageSummary
-  deals: Deal[]
-}
+import type { Deal, DealsGroupedByStage } from '@crm/shared'
 
 export default function DealBoard() {
-  const [groups, setGroups] = useState<DealGroup[]>([])
+  const [groups, setGroups] = useState<DealsGroupedByStage[]>([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'board' | 'lista'>('board')
 
@@ -31,9 +26,10 @@ export default function DealBoard() {
 
   useEffect(() => { load() }, [load])
 
+  // Prisma Decimal serializes as string in JSON — coerce to Number before arithmetic
   const totalValue = groups
     .flatMap((g) => g.deals)
-    .reduce((sum, d) => sum + (d.value ?? 0), 0)
+    .reduce((sum, d) => sum + Number(d.value ?? 0), 0)
 
   const totalDeals = groups.flatMap((g) => g.deals).length
 

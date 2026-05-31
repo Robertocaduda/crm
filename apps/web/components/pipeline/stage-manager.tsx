@@ -52,6 +52,7 @@ export default function StageManager() {
 
   async function handleUpdate(id: string) {
     if (!editName.trim()) return
+    setError('')
     try {
       await pipelineStagesApi.update(id, { name: editName.trim(), color: editColor })
       setEditingId(null)
@@ -63,6 +64,7 @@ export default function StageManager() {
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Excluir o estágio "${name}"? Só é possível se não houver deals vinculados.`)) return
+    setError('')
     try {
       await pipelineStagesApi.delete(id)
       await load()
@@ -77,6 +79,7 @@ export default function StageManager() {
     if (targetIndex < 0 || targetIndex >= newStages.length) return
     ;[newStages[index], newStages[targetIndex]] = [newStages[targetIndex], newStages[index]]
     const reordered = newStages.map((s, i) => ({ id: s.id, order: i + 1 }))
+    setError('')
     try {
       await pipelineStagesApi.reorder({ stages: reordered })
       await load()

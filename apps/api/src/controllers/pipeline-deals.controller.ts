@@ -128,6 +128,7 @@ export async function updateDeal(req: Request, res: Response) {
     res.json({ data: deal })
   } catch (e: any) {
     if (e.code === 'P2025') { res.status(404).json({ error: 'Negociação não encontrada' }); return }
+    if (e.code === 'P2003') { res.status(400).json({ error: 'stageId, contactId ou companyId inválido' }); return }
     res.status(500).json({ error: 'Erro interno do servidor' })
   }
 }
