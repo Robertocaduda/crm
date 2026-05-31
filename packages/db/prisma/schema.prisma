@@ -31,6 +31,7 @@ model Company {
   sector    String?
   notes     String?
   contacts  Contact[]
+  deals     Deal[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -52,6 +53,41 @@ model Contact {
   company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
   companyId String?
   tags      Tag[]
+  deals     Deal[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PipelineStage {
+  id        String   @id @default(cuid())
+  name      String
+  order     Int
+  color     String
+  deals     Deal[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Deal {
+  id              String        @id @default(cuid())
+  title           String
+  value           Decimal?
+  probability     Int?
+  expectedCloseAt DateTime?
+  notes           String?
+  status          DealStatus    @default(OPEN)
+  stage           PipelineStage @relation(fields: [stageId], references: [id])
+  stageId         String
+  contact         Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId       String?
+  company         Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId       String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum DealStatus {
+  OPEN
+  WON
+  LOST
 }

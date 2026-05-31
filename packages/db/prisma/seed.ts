@@ -86,7 +86,49 @@ async function main() {
     }
   }
 
-  console.log('Seed Fase 2 completo: 4 empresas, 4 tags, 10 contatos criados.')
+  // Pipeline Stages
+  const stageProspeccao = await prisma.pipelineStage.upsert({
+    where: { id: 'stage-prospeccao' },
+    update: {},
+    create: { id: 'stage-prospeccao', name: 'Prospecção', order: 1, color: '#6366f1' },
+  })
+  const stageProposta = await prisma.pipelineStage.upsert({
+    where: { id: 'stage-proposta' },
+    update: {},
+    create: { id: 'stage-proposta', name: 'Proposta', order: 2, color: '#f59e0b' },
+  })
+  const stageFechamento = await prisma.pipelineStage.upsert({
+    where: { id: 'stage-fechamento' },
+    update: {},
+    create: { id: 'stage-fechamento', name: 'Fechamento', order: 3, color: '#22c55e' },
+  })
+
+  // Deals (vinculados a contatos e empresas do seed da Fase 2)
+  const deals = [
+    { id: 'deal-1', title: 'Contrato Tech Solutions Q3', value: 32000, probability: 75, stageId: stageProposta.id, companyId: techSolutions.id },
+    { id: 'deal-2', title: 'Licença GlobalCorp Enterprise', value: 15000, probability: 40, stageId: stageProspeccao.id, companyId: globalCorp.id },
+    { id: 'deal-3', title: 'Consultoria StartupXYZ', value: 8500, probability: 60, stageId: stageProspeccao.id, companyId: startupXYZ.id },
+    { id: 'deal-4', title: 'Renovação Mega Ind.', value: 50000, probability: 90, stageId: stageFechamento.id, companyId: megaInd.id },
+    { id: 'deal-5', title: 'Expansão Tech Solutions Q4', value: 20000, probability: 55, stageId: stageProposta.id, companyId: techSolutions.id },
+  ]
+
+  for (const d of deals) {
+    await prisma.deal.upsert({
+      where: { id: d.id },
+      update: {},
+      create: {
+        id: d.id,
+        title: d.title,
+        value: d.value,
+        probability: d.probability,
+        stageId: d.stageId,
+        companyId: d.companyId,
+        status: 'OPEN',
+      },
+    })
+  }
+
+  console.log('Seed Fase 3 completo: 3 estágios + 5 deals criados.')
 }
 
 main()
