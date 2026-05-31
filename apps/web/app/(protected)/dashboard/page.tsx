@@ -4,12 +4,7 @@ import ActivityFeed from '@/components/dashboard/activity-feed'
 import DealsList from '@/components/dashboard/deals-list'
 import UpcomingTasks from '@/components/dashboard/upcoming-tasks'
 import KpiCard from '@/components/dashboard/kpi-card'
-import {
-  MOCK_FUNNEL,
-  MOCK_ACTIVITIES,
-  MOCK_DEALS,
-  MOCK_TASKS,
-} from '@/lib/mock-data'
+import { MOCK_FUNNEL, MOCK_ACTIVITIES, MOCK_DEALS } from '@/lib/mock-data'
 
 async function getContactCount(token: string, apiUrl: string): Promise<number> {
   try {
@@ -18,11 +13,8 @@ async function getContactCount(token: string, apiUrl: string): Promise<number> {
       cache: 'no-store',
     })
     if (!res.ok) return 0
-    const data = await res.json()
-    return data.meta?.total ?? 0
-  } catch {
-    return 0
-  }
+    return (await res.json()).meta?.total ?? 0
+  } catch { return 0 }
 }
 
 async function getOpenDealsCount(token: string, apiUrl: string): Promise<number> {
@@ -34,9 +26,34 @@ async function getOpenDealsCount(token: string, apiUrl: string): Promise<number>
     if (!res.ok) return 0
     const data = await res.json()
     return (data.data as { deals: unknown[] }[]).reduce((sum, g) => sum + g.deals.length, 0)
-  } catch {
-    return 0
-  }
+  } catch { return 0 }
+}
+
+interface UpcomingTask { id: string; title: string; datetime: string; type: string; typeColor: string }
+
+async function getUpcomingTasks(token: string, apiUrl: string): Promise<UpcomingTask[]> {
+  try {
+    const res = await fetch(`${apiUrl}/api/tasks?filter=week&limit=5`, {
+      headers: { Cookie: `access_token=${token}` },
+      cache: 'no-store',
+    })
+    if (!res.ok) return []
+    const data = await res.json()
+
+    const PRIORITY_MAP: Record<string, { type: string; typeColor: string }> = {
+      HIGH: { type: 'Alta', typeColor: 'bg-red-100 text-red-700' },
+      MEDIUM: { type: 'Média', typeColor: 'bg-amber-100 text-amber-700' },
+      LOW: { type: 'Baixa', typeColor: 'bg-slate-100 text-slate-500' },
+    }
+
+    return (data.data as any[]).map((t) => {
+      const p = PRIORITY_MAP[t.priority] ?? { type: 'Média', typeColor: 'bg-amber-100 text-amber-700' }
+      const date = t.dueAt
+        ? new Date(t.dueAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+        : 'Sem prazo'
+      return { id: t.id, title: t.title, datetime: date, type: p.type, typeColor: p.typeColor }
+    })
+  } catch { return [] }
 }
 
 export default async function DashboardPage() {
@@ -44,9 +61,10 @@ export default async function DashboardPage() {
   const token = cookieStore.get('access_token')?.value ?? ''
   const apiUrl = process.env.API_URL ?? 'http://localhost:3001'
 
-  const [contactCount, openDealsCount] = await Promise.all([
+  const [contactCount, openDealsCount, upcomingTasks] = await Promise.all([
     getContactCount(token, apiUrl),
     getOpenDealsCount(token, apiUrl),
+    getUpcomingTasks(token, apiUrl),
   ])
 
   const kpis = [
@@ -59,7 +77,7 @@ export default async function DashboardPage() {
   return (
     <div className="p-5 space-y-4">
       <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 text-xs text-amber-800">
-        ⚠️ <strong>Contatos e Pipeline: dados reais.</strong> Demais módulos serão ativados nas próximas fases.
+        ⚠️ <strong>Contatos, Pipeline e Tarefas: dados reais.</strong> Demais módulos serão ativados nas próximas fases.
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -73,7 +91,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <DealsList deals={MOCK_DEALS} />
-        <UpcomingTasks tasks={MOCK_TASKS} />
+        <UpcomingTasks tasks={upcomingTasks} />
       </div>
     </div>
   )
