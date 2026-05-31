@@ -111,6 +111,7 @@ export async function updateDeal(req: Request, res: Response) {
   try {
     const deal = await prisma.deal.update({
       where: { id },
+      // String fields use || (empty string → null); number fields use ?? (0 is valid)
       data: {
         ...(title !== undefined && { title }),
         ...(stageId !== undefined && { stageId }),
