@@ -103,7 +103,7 @@ async function main() {
     create: { id: 'stage-fechamento', name: 'Fechamento', order: 3, color: '#22c55e' },
   })
 
-  // Deals (vinculados a contatos e empresas do seed da Fase 2)
+  // Deals (vinculados a empresas do seed)
   const deals = [
     { id: 'deal-1', title: 'Contrato Tech Solutions Q3', value: 32000, probability: 75, stageId: stageProposta.id, companyId: techSolutions.id },
     { id: 'deal-2', title: 'Licença GlobalCorp Enterprise', value: 15000, probability: 40, stageId: stageProspeccao.id, companyId: globalCorp.id },
