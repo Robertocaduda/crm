@@ -2,11 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import { pipelineDealsApi } from '@/lib/api/pipeline-deals'
-import type { Deal, PipelineStage } from '@crm/shared'
+import type { Deal, PipelineStageSummary } from '@crm/shared'
 
 interface DealCardProps {
   deal: Deal
-  stages: PipelineStage[]
+  stages: PipelineStageSummary[]
   onUpdate: () => void
 }
 
