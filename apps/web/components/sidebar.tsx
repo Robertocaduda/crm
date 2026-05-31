@@ -108,8 +108,17 @@ export default function Sidebar({ user }: SidebarProps) {
         )}
 
         <p className="px-4 py-2 mt-2 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Outros</p>
+
+        {/* Tarefas — ativo */}
+        <Link
+          href="/tarefas"
+          className={`flex items-center gap-2.5 px-4 py-2 text-[13px] transition-colors relative ${pathname.startsWith('/tarefas') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'}`}
+        >
+          {pathname.startsWith('/tarefas') && <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-500 rounded-r" />}
+          <span className="text-sm w-4 text-center">✅</span> Tarefas
+        </Link>
+
         {[
-          { label: 'Tarefas', icon: '✅', phase: 4 },
           { label: 'Suporte', icon: '🎧', phase: 5 },
           { label: 'Marketing', icon: '📣', phase: 6 },
         ].map((item) => (
