@@ -98,7 +98,7 @@ export default function ContactTable() {
               {contacts.map((contact) => (
                 <tr key={contact.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2.5">
+                    <button onClick={() => router.push(`/contatos/${contact.id}`)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity text-left">
                       <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: avatarColor(contact.name) }}>
                         {initials(contact.name)}
                       </div>
@@ -106,7 +106,7 @@ export default function ContactTable() {
                         <p className="font-medium text-slate-900 text-xs">{contact.name}</p>
                         {contact.jobTitle && <p className="text-[10px] text-slate-400">{contact.jobTitle}</p>}
                       </div>
-                    </div>
+                    </button>
                   </td>
                   <td className="px-4 py-3">
                     {contact.company ? <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">{contact.company.name}</span> : <span className="text-xs text-slate-300">—</span>}
