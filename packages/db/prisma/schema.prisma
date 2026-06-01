@@ -194,6 +194,7 @@ model MarketingListMember {
   addedAt   DateTime      @default(now())
 
   @@id([listId, contactId])
+  @@index([contactId])
 }
 
 enum TicketStatus {
