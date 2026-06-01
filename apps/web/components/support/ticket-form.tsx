@@ -118,9 +118,9 @@ export default function TicketForm() {
               onChange={e => set('priority', e.target.value)}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
             >
-              <option value="HIGH">Alta</option>
-              <option value="MEDIUM">Média</option>
-              <option value="LOW">Baixa</option>
+              <option value="HIGH">🔴 Alta</option>
+              <option value="MEDIUM">🟡 Média</option>
+              <option value="LOW">⚪ Baixa</option>
             </select>
           </div>
           <div>
@@ -130,10 +130,10 @@ export default function TicketForm() {
               onChange={e => set('category', e.target.value)}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
             >
-              <option value="BUG">Bug</option>
-              <option value="QUESTION">Dúvida</option>
-              <option value="REQUEST">Solicitação</option>
-              <option value="OTHER">Outro</option>
+              <option value="BUG">🐛 Bug</option>
+              <option value="QUESTION">❓ Dúvida</option>
+              <option value="REQUEST">📋 Solicitação</option>
+              <option value="OTHER">📌 Outro</option>
             </select>
           </div>
         </div>
