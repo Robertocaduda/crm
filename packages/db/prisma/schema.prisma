@@ -15,6 +15,8 @@ model User {
   role         Role     @default(USER)
   refreshToken String?
   tasks        Task[]
+  ticketsAssigned   Ticket[]        @relation("TicketAssignee")
+  ticketComments    TicketComment[] @relation("TicketCommentAuthor")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -34,6 +36,7 @@ model Company {
   contacts  Contact[]
   deals     Deal[]
   tasks     Task[]
+  tickets   Ticket[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -57,6 +60,7 @@ model Contact {
   tags      Tag[]
   deals     Deal[]
   tasks     Task[]
+  tickets   Ticket[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -137,4 +141,56 @@ enum Recurrence {
   DAILY
   WEEKLY
   MONTHLY
+}
+
+model Ticket {
+  id          String         @id @default(cuid())
+  number      Int            @unique @default(autoincrement())
+  title       String
+  description String?
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  category    TicketCategory @default(OTHER)
+  resolution  String?
+
+  assignee    User?          @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  assigneeId  String?
+
+  contact     Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId   String?
+  company     Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId   String?
+
+  comments    TicketComment[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model TicketComment {
+  id        String   @id @default(cuid())
+  body      String
+  author    User     @relation("TicketCommentAuthor", fields: [authorId], references: [id])
+  authorId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketId  String
+  createdAt DateTime @default(now())
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum TicketPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum TicketCategory {
+  BUG
+  QUESTION
+  REQUEST
+  OTHER
 }

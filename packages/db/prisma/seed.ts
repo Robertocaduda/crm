@@ -197,7 +197,78 @@ async function main() {
     }
   }
 
-  console.log('Seed Fase 4 completo: 5 tarefas criadas.')
+  // Tickets de Suporte
+  const adminForTickets = await prisma.user.findUnique({ where: { email: 'admin@crm.dev' } })
+  if (adminForTickets) {
+    const ticket1 = await prisma.ticket.upsert({
+      where: { number: 1 },
+      update: {},
+      create: {
+        number: 1,
+        title: 'Erro no módulo de pagamento',
+        description: 'O sistema retorna erro 500 ao tentar processar pagamento via boleto.',
+        status: 'IN_PROGRESS',
+        priority: 'HIGH',
+        category: 'BUG',
+        assigneeId: adminForTickets.id,
+        companyId: techSolutions.id,
+      },
+    })
+    await prisma.ticket.upsert({
+      where: { number: 2 },
+      update: {},
+      create: {
+        number: 2,
+        title: 'Dúvida sobre fatura de março',
+        description: 'Cliente questiona cobrança duplicada na fatura de março.',
+        status: 'OPEN',
+        priority: 'MEDIUM',
+        category: 'QUESTION',
+        companyId: globalCorp.id,
+      },
+    })
+    await prisma.ticket.upsert({
+      where: { number: 3 },
+      update: {},
+      create: {
+        number: 3,
+        title: 'Solicitação de novo usuário',
+        description: 'Cliente solicita criação de conta para novo funcionário.',
+        status: 'OPEN',
+        priority: 'LOW',
+        category: 'REQUEST',
+        companyId: startupXYZ.id,
+      },
+    })
+    await prisma.ticket.upsert({
+      where: { number: 4 },
+      update: {},
+      create: {
+        number: 4,
+        title: 'Acesso bloqueado após atualização',
+        description: 'Usuário não consegue fazer login após atualização do sistema.',
+        status: 'RESOLVED',
+        priority: 'HIGH',
+        category: 'BUG',
+        resolution: 'Senha resetada e sessão limpa. Usuário conseguiu acessar.',
+        assigneeId: adminForTickets.id,
+        companyId: megaInd.id,
+      },
+    })
+
+    // Comentários no ticket #1
+    const existingComments = await prisma.ticketComment.count({ where: { ticketId: ticket1.id } })
+    if (existingComments === 0) {
+      await prisma.ticketComment.createMany({
+        data: [
+          { body: 'Reproduzido o erro. Investigando a integração com o gateway de pagamento.', authorId: adminForTickets.id, ticketId: ticket1.id },
+          { body: 'Identificado bug na versão 2.3.1 do SDK do gateway. Aguardando hotfix do fornecedor.', authorId: adminForTickets.id, ticketId: ticket1.id },
+        ],
+      })
+    }
+  }
+
+  console.log('Seed Fase 5 completo: 4 tickets + 2 comentários criados.')
 }
 
 main()
