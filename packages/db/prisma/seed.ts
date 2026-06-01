@@ -268,6 +268,11 @@ async function main() {
     }
   }
 
+  // Reset sequence so autoincrement starts after seeded values
+  await prisma.$executeRawUnsafe(
+    `SELECT setval('"Ticket_number_seq"', (SELECT MAX(number) FROM "Ticket"), true)`
+  )
+
   console.log('Seed Fase 5 completo: 4 tickets + 2 comentários criados.')
 }
 
