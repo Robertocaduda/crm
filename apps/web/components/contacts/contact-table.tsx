@@ -187,7 +187,7 @@ export default function ContactTable() {
             <span>Mostrando {contacts.length} de {meta.total} contatos</span>
             <div className="flex gap-1">
               {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((p) => (
-                <button key={p} onClick={() => setPage(p)} className={`w-7 h-7 rounded border text-xs font-medium ${p === page ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{p}</button>
+                <button key={p} onClick={() => { setPage(p); setSelectedIds(new Set()) }} className={`w-7 h-7 rounded border text-xs font-medium ${p === page ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{p}</button>
               ))}
             </div>
           </div>

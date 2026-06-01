@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { marketingApi } from '@/lib/api/marketing'
-import type { MarketingList } from '@crm/shared'
+import { apiFetch } from '@/lib/api-client'
+import type { MarketingList, MarketingListMember, PaginatedResponse } from '@crm/shared'
 
 interface ContactListsSectionProps {
   contactId: string
@@ -22,7 +23,9 @@ export default function ContactListsSection({ contactId }: ContactListsSectionPr
         const checks = await Promise.all(
           res.data.map(async (list) => {
             try {
-              const members = await marketingApi.listMembers(list.id, 1)
+              const members = await apiFetch<PaginatedResponse<MarketingListMember>>(
+                `/api/marketing/lists/${list.id}/members?page=1&limit=1000`
+              )
               const found = members.data.some((m) => m.contactId === contactId)
               return found ? list.id : null
             } catch {

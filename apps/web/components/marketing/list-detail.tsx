@@ -29,10 +29,15 @@ export default function ListDetail({ list, initialMembers, initialTotal, initial
   const [saving, setSaving] = useState(false)
 
   async function handleAddMember(contactId: string, _contactName: string) {
-    await marketingApi.addMembers(list.id, [contactId])
-    const res = await marketingApi.listMembers(list.id, page)
-    setMembers(res.data)
-    setTotal(res.meta.total)
+    setError('')
+    try {
+      await marketingApi.addMembers(list.id, [contactId])
+      const res = await marketingApi.listMembers(list.id, page)
+      setMembers(res.data)
+      setTotal(res.meta.total)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao adicionar contato')
+    }
   }
 
   async function handleRemoveMember(contactId: string) {
