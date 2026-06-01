@@ -273,7 +273,40 @@ async function main() {
     `SELECT setval('"Ticket_number_seq"', (SELECT MAX(number) FROM "Ticket"), true)`
   )
 
-  console.log('Seed Fase 5 completo: 4 tickets + 2 comentários criados.')
+  // Marketing Lists
+  const someContacts = await prisma.contact.findMany({ take: 6, orderBy: { createdAt: 'asc' } })
+  if (someContacts.length >= 2) {
+    const ml1 = await prisma.marketingList.upsert({
+      where: { id: 'ml-clientes-ativos' },
+      update: {},
+      create: { id: 'ml-clientes-ativos', name: 'Clientes Ativos', description: 'Clientes com contrato vigente' },
+    })
+    const ml2 = await prisma.marketingList.upsert({
+      where: { id: 'ml-leads-quentes' },
+      update: {},
+      create: { id: 'ml-leads-quentes', name: 'Leads Quentes', description: 'Prospects com deal aberto' },
+    })
+    const ml3 = await prisma.marketingList.upsert({
+      where: { id: 'ml-newsletter' },
+      update: {},
+      create: { id: 'ml-newsletter', name: 'Newsletter Q3', description: 'Lista para envio trimestral' },
+    })
+
+    await prisma.marketingListMember.createMany({
+      skipDuplicates: true,
+      data: [
+        { listId: ml1.id, contactId: someContacts[0].id },
+        { listId: ml1.id, contactId: someContacts[1].id },
+        { listId: ml2.id, contactId: someContacts[1].id },
+        { listId: ml2.id, contactId: someContacts[2 % someContacts.length].id },
+        { listId: ml3.id, contactId: someContacts[0].id },
+        { listId: ml3.id, contactId: someContacts[3 % someContacts.length].id },
+        { listId: ml3.id, contactId: someContacts[4 % someContacts.length].id },
+      ],
+    })
+  }
+
+  console.log('Seed Fase 6 completo: 3 listas de marketing criadas.')
 }
 
 main()
