@@ -127,15 +127,14 @@ export default function Sidebar({ user }: SidebarProps) {
           <span className="text-sm w-4 text-center">🎧</span> Suporte
         </Link>
 
-        {[
-          { label: 'Marketing', icon: '📣', phase: 6 },
-        ].map((item) => (
-          <div key={item.label} className="flex items-center gap-2.5 px-4 py-2 text-slate-700 cursor-default select-none">
-            <span className="text-sm w-4 text-center">{item.icon}</span>
-            <span className="text-[13px]">{item.label}</span>
-            <span className="ml-auto text-[9px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded-full">Fase {item.phase}</span>
-          </div>
-        ))}
+        {/* Marketing — ativo */}
+        <Link
+          href="/marketing"
+          className={`flex items-center gap-2.5 px-4 py-2 text-[13px] transition-colors relative ${pathname.startsWith('/marketing') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'}`}
+        >
+          {pathname.startsWith('/marketing') && <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-500 rounded-r" />}
+          <span className="text-sm w-4 text-center">📣</span> Marketing
+        </Link>
       </nav>
 
       <div className="border-t border-slate-800 p-3 flex items-center gap-2.5">
