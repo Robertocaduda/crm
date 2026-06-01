@@ -77,6 +77,7 @@ export default function TicketDetail({ initial }: TicketDetailProps) {
     e.preventDefault()
     if (!commentBody.trim()) return
     setCommenting(true)
+    setError('')
     try {
       const res = await ticketsApi.addComment(ticket.id, commentBody.trim())
       setTicket(prev => ({ ...prev, comments: [...prev.comments, res.data] }))
@@ -90,6 +91,7 @@ export default function TicketDetail({ initial }: TicketDetailProps) {
 
   async function handleDeleteComment(commentId: string) {
     if (!confirm('Excluir este comentário?')) return
+    setError('')
     try {
       await ticketsApi.deleteComment(ticket.id, commentId)
       setTicket(prev => ({ ...prev, comments: prev.comments.filter(c => c.id !== commentId) }))
