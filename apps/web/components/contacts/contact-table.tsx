@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { contactsApi } from '@/lib/api/contacts'
 import { tagsApi } from '@/lib/api/tags'
+import { marketingApi } from '@/lib/api/marketing'
 import TagFilter from './tag-filter'
 import DeleteModal from './delete-modal'
-import type { Contact, Tag, PaginationMeta } from '@crm/shared'
+import type { Contact, Tag, PaginationMeta, MarketingList } from '@crm/shared'
 
 const AVATAR_COLORS = ['#6366f1','#8b5cf6','#ec4899','#f59e0b','#22c55e','#3b82f6','#14b8a6','#ef4444']
 
@@ -29,6 +30,11 @@ export default function ContactTable() {
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Contact | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [allLists, setAllLists] = useState<MarketingList[]>([])
+  const [bulkModal, setBulkModal] = useState(false)
+  const [bulkListId, setBulkListId] = useState('')
+  const [bulkAdding, setBulkAdding] = useState(false)
 
   const loadContacts = useCallback(async (s: string, tagId: string | null, p: number) => {
     setLoading(true)
@@ -57,6 +63,33 @@ export default function ContactTable() {
     await loadContacts(search, selectedTagId, page)
   }
 
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  async function openBulkModal() {
+    const res = await marketingApi.listLists()
+    setAllLists(res.data)
+    setBulkListId(res.data[0]?.id ?? '')
+    setBulkModal(true)
+  }
+
+  async function handleBulkAdd() {
+    if (!bulkListId || selectedIds.size === 0) return
+    setBulkAdding(true)
+    try {
+      await marketingApi.addMembers(bulkListId, Array.from(selectedIds))
+      setSelectedIds(new Set())
+      setBulkModal(false)
+    } finally {
+      setBulkAdding(false)
+    }
+  }
+
   return (
     <>
       {deleteTarget && (
@@ -67,6 +100,15 @@ export default function ContactTable() {
         />
       )}
       <div className="p-5">
+        {selectedIds.size > 0 && (
+          <div className="flex items-center gap-3 bg-violet-50 border border-violet-200 rounded-lg px-4 py-2.5 mb-3">
+            <span className="text-xs font-semibold text-violet-700">{selectedIds.size} contato{selectedIds.size !== 1 ? 's' : ''} selecionado{selectedIds.size !== 1 ? 's' : ''}</span>
+            <button onClick={openBulkModal} className="ml-auto px-3 py-1.5 bg-violet-600 text-white text-xs font-medium rounded-lg hover:bg-violet-700">
+              📋 Adicionar à lista
+            </button>
+            <button onClick={() => setSelectedIds(new Set())} className="text-xs text-violet-500 hover:text-violet-700">Cancelar</button>
+          </div>
+        )}
         <div className="flex items-center justify-between mb-3">
           <input
             value={search}
@@ -85,6 +127,7 @@ export default function ContactTable() {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
+                <th className="px-4 py-2.5 w-8"></th>
                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Nome</th>
                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Empresa</th>
                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Tags</th>
@@ -93,10 +136,19 @@ export default function ContactTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {loading && <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-400 text-sm">Carregando...</td></tr>}
-              {!loading && contacts.length === 0 && <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-400 text-sm">Nenhum contato encontrado.</td></tr>}
+              {loading && <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-400 text-sm">Carregando...</td></tr>}
+              {!loading && contacts.length === 0 && <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-400 text-sm">Nenhum contato encontrado.</td></tr>}
               {contacts.map((contact) => (
                 <tr key={contact.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(contact.id)}
+                      onChange={() => toggleSelect(contact.id)}
+                      className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     <button onClick={() => router.push(`/contatos/${contact.id}`)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity text-left">
                       <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: avatarColor(contact.name) }}>
@@ -141,6 +193,33 @@ export default function ContactTable() {
           </div>
         )}
       </div>
+      {bulkModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm">
+            <h2 className="text-sm font-semibold text-slate-900 mb-4">
+              Adicionar {selectedIds.size} contato{selectedIds.size !== 1 ? 's' : ''} a qual lista?
+            </h2>
+            <div className="space-y-2 mb-5 max-h-48 overflow-y-auto">
+              {allLists.map((list) => (
+                <label key={list.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer border transition-colors ${bulkListId === list.id ? 'border-violet-300 bg-violet-50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                  <input type="radio" name="bulkList" value={list.id} checked={bulkListId === list.id} onChange={() => setBulkListId(list.id)} className="text-violet-600" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-900 truncate">{list.name}</p>
+                    <p className="text-[10px] text-slate-400">{list.memberCount} membros</p>
+                  </div>
+                </label>
+              ))}
+              {allLists.length === 0 && <p className="text-xs text-slate-400 text-center py-4">Nenhuma lista criada ainda.</p>}
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setBulkModal(false)} className="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50">Cancelar</button>
+              <button onClick={handleBulkAdd} disabled={bulkAdding || !bulkListId} className="px-4 py-2 text-sm bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 disabled:opacity-50">
+                {bulkAdding ? 'Adicionando...' : 'Adicionar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
