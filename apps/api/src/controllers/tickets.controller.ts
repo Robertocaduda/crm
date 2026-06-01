@@ -170,12 +170,24 @@ export async function createComment(req: Request, res: Response) {
 }
 
 export async function deleteComment(req: Request, res: Response) {
-  const { commentId } = req.params
+  const { id: ticketId, commentId } = req.params
+  const userId = (req as any).user?.id
+  if (!userId) { res.status(401).json({ error: 'Não autenticado' }); return }
+
   try {
+    const comment = await prisma.ticketComment.findUnique({ where: { id: commentId } })
+    if (!comment || comment.ticketId !== ticketId) {
+      res.status(404).json({ error: 'Comentário não encontrado' })
+      return
+    }
+    const userRole = (req as any).user?.role
+    if (comment.authorId !== userId && userRole !== 'ADMIN') {
+      res.status(403).json({ error: 'Sem permissão' })
+      return
+    }
     await prisma.ticketComment.delete({ where: { id: commentId } })
     res.json({ ok: true })
-  } catch (e: any) {
-    if (e.code === 'P2025') { res.status(404).json({ error: 'Comentário não encontrado' }); return }
+  } catch {
     res.status(500).json({ error: 'Erro interno do servidor' })
   }
 }
