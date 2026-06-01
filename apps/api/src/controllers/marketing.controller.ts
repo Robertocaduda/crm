@@ -137,11 +137,11 @@ export async function addMembers(req: Request, res: Response) {
     const list = await prisma.marketingList.findUnique({ where: { id: listId } })
     if (!list) { res.status(404).json({ error: 'Lista não encontrada' }); return }
 
-    await prisma.marketingListMember.createMany({
+    const result = await prisma.marketingListMember.createMany({
       data: contactIds.map((contactId) => ({ listId, contactId })),
       skipDuplicates: true,
     })
-    res.status(201).json({ ok: true, added: contactIds.length })
+    res.status(201).json({ ok: true, added: result.count })
   } catch (e: any) {
     if (e.code === 'P2003') { res.status(400).json({ error: 'Um ou mais contactIds inválidos' }); return }
     res.status(500).json({ error: 'Erro interno do servidor' })
