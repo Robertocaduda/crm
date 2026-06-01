@@ -26,6 +26,8 @@ export default function TicketBoard() {
     try {
       const res = await ticketsApi.listKanban()
       setGroups(res.data)
+    } catch {
+      // silently keep empty groups on error
     } finally {
       setLoading(false)
     }

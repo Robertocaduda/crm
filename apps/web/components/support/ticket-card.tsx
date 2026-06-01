@@ -22,7 +22,7 @@ const PRIORITY_DOT: Record<string, string> = {
 
 export default function TicketCard({ ticket }: TicketCardProps) {
   const router = useRouter()
-  const cat = CATEGORY_BADGE[ticket.category]
+  const cat = CATEGORY_BADGE[ticket.category] ?? CATEGORY_BADGE['OTHER']
 
   return (
     <div
@@ -30,7 +30,7 @@ export default function TicketCard({ ticket }: TicketCardProps) {
       className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm hover:border-indigo-300 transition-colors cursor-pointer"
     >
       <div className="flex items-center gap-1.5 mb-2">
-        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${PRIORITY_DOT[ticket.priority]}`} />
+        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${PRIORITY_DOT[ticket.priority] ?? 'bg-slate-300'}`} />
         <span className="text-[10px] font-mono text-slate-400">#{ticket.number}</span>
         <span className={`ml-auto text-[9px] font-medium px-2 py-0.5 rounded-full ${cat.className}`}>
           {cat.label}
