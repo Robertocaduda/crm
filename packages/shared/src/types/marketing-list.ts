@@ -1,3 +1,5 @@
+import type { CompanySummary } from './company'
+
 export interface MarketingList {
   id: string
   name: string
@@ -13,7 +15,7 @@ export interface MarketingListMember {
     id: string
     name: string
     email: string | null
-    company: { id: string; name: string } | null
+    company: CompanySummary | null
   }
   addedAt: string
 }
